@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Criar Tarefa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h2>Criar Nova Tarefa</h2>
+    <form method="POST">
+        <label>Descrição:</label><br>
+        <input type="text" name="descricao" required><br>
+
+        <label>Data Criação:</label><br>
+        <input type="date" name="data_criacao" required><br>
+
+        <label>Data Prevista:</label><br>
+        <input type="date" name="data_prevista" required><br>
+
+        <label>Data Encerramento:</label><br>
+        <input type="date" name="data_encerramento"><br>
+
+        <label>Situação:</label><br>
+        <select name="situacao">
+            <option value="Pendente">Pendente</option>
+            <option value="Em andamento">Em andamento</option>
+            <option value="Concluído">Concluído</option>
+        </select><br><br>
+
+        <button type="submit">Salvar</button>
+    </form>
+</body>
+</html>

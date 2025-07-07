@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Tarefas</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Tarefas Cadastradas</h1>
+
+    <!-- Formulário de filtros -->
+    <form method="get" action="{{ url_for('listar_tarefas') }}">
+        <label for="data_prevista">Data Prevista:</label>
+        <input type="date" name="data_prevista" id="data_prevista">
+
+        <label for="situacao">Situação:</label>
+        <select name="situacao" id="situacao">
+            <option value="Todos">Todos</option>
+            <option value="Pendente">Pendente</option>
+            <option value="Em andamento">Em andamento</option>
+            <option value="Concluído">Concluído</option>
+        </select>
+
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <!-- Botões -->
+    <p>
+        <a href="{{ url_for('criar_tarefa') }}" class="btn">Criar Nova Tarefa</a>
+        <a href="{{ url_for('exportar_pdf', data_prevista=request.args.get('data_prevista'), situacao=request.args.get('situacao')) }}" class="btn">Exportar para PDF</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger" style="margin-left: 20px;">Sair</a>
+    </p>
+
+    <!-- Tabela de tarefas -->
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Descrição</th>
+            <th>Data Criação</th>
+            <th>Data Prevista</th>
+            <th>Data Encerramento</th>
+            <th>Situação</th>
+        </tr>
+        {% for tarefa in tarefas %}
+        <tr>
+            {% for campo in tarefa %}
+            <td>{{ campo }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

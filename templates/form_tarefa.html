@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ 'Editar Tarefa' if tarefa else 'Nova Tarefa' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ 'Editar Tarefa' if tarefa else 'Nova Tarefa' }}</h1>
+
+        <form method="POST">
+            <label for="descricao">Descrição:</label>
+            <input type="text" id="descricao" name="descricao" required
+                   value="{{ tarefa[1] if tarefa else '' }}">
+
+            <label for="data_prevista">Data Prevista:</label>
+            <input type="date" id="data_prevista" name="data_prevista" required
+                   value="{{ tarefa[3] if tarefa else '' }}">
+
+            {% if tarefa %}
+            <label for="data_encerramento">Data Encerramento:</label>
+            <input type="date" id="data_encerramento" name="data_encerramento"
+                   value="{{ tarefa[4] if tarefa else '' }}">
+            {% endif %}
+
+            <label for="situacao">Situação:</label>
+            <select id="situacao" name="situacao" required>
+                {% set atual = tarefa[5] if tarefa else '' %}
+                <option value="Pendente" {{ 'selected' if atual == 'Pendente' }}>Pendente</option>
+                <option value="Em andamento" {{ 'selected' if atual == 'Em andamento' }}>Em andamento</option>
+                <option value="Concluído" {{ 'selected' if atual == 'Concluído' }}>Concluído</option>
+            </select>
+
+            <button type="submit">Salvar</button>
+            <a href="{{ url_for('listar_tarefas') }}">Cancelar</a>
+        </form>
+    </div>
+</body>
+</html>
