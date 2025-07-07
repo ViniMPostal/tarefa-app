@@ -114,10 +114,14 @@ if __name__ == '__main__':
     # Porta padrão
     porta = 5000
 
-    # Se for passado um argumento como --port=5050
+    # Verifica se foi passado argumento como --port=5050
     for arg in sys.argv:
         if arg.startswith("--port="):
-            porta = int(arg.split("=")[1])
+            try:
+                porta = int(arg.split("=")[1])
+            except ValueError:
+                print("⚠️ Porta inválida! Usando a porta padrão 5000.")
 
     app.run(host='0.0.0.0', port=porta)
+
 
