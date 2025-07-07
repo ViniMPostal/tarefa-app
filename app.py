@@ -111,17 +111,24 @@ def exportar_pdf():
 if __name__ == '__main__':
     import sys
 
-    # Porta padrão
+    # Porta padrão (desenvolvimento)
     porta = 5000
+    ambiente = "desenvolvimento"
 
-    # Verifica se foi passado argumento como --port=5050
+    # Verifica se foi passado argumento como --port=XXXX
     for arg in sys.argv:
         if arg.startswith("--port="):
             try:
                 porta = int(arg.split("=")[1])
+                if porta == 5050:
+                    ambiente = "homologação"
+                elif porta == 6060:
+                    ambiente = "produção"
             except ValueError:
                 print("⚠️ Porta inválida! Usando a porta padrão 5000.")
 
+    print(f"✅ Iniciando em modo: {ambiente.upper()} na porta {porta}")
     app.run(host='0.0.0.0', port=porta)
+
 
 
