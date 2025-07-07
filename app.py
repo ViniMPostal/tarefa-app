@@ -109,4 +109,15 @@ def exportar_pdf():
     return send_file(buffer, as_attachment=True, download_name="tarefas.pdf", mimetype='application/pdf')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    import sys
+
+    # Porta padrão
+    porta = 5000
+
+    # Se for passado um argumento como --port=5050
+    for arg in sys.argv:
+        if arg.startswith("--port="):
+            porta = int(arg.split("=")[1])
+
+    app.run(host='0.0.0.0', port=porta)
+
