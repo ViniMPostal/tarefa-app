@@ -1,2 +1,5 @@
 Flask
 flask-bcrypt
+reportlab
+psycopg2-binary
+coverage

@@ -1,0 +1,33 @@
+name: Rodar testes automatizados
+
+on:
+  push:
+    branches:
+      - main  # ou 'master', dependendo da sua branch
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositório
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          pip install coverage
+
+      - name: Rodar testes com coverage
+        run: |
+          source venv/bin/activate
+          coverage run -m unittest discover tests
+          coverage report
