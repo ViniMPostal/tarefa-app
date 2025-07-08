@@ -1,23 +1,25 @@
 #!/bin/bash
 
-echo "Iniciando deploy para ambiente de homologação..."
+echo "Iniciando deploy para o ambiente de homologação..."
 
-# Parâmetros
-VM_USER="univates"
-VM_HOST="177.44.248.80"
-APP_DIR="homologacao"
-LOCAL_DIR="."
-PORTA=5050
+# Caminho na VM onde o projeto está localizado
+APP_DIR=~/tarefa-app
+HOMOLOG_DIR=~/homologacao
 
-# Envia os arquivos para a VM via rsync (ignora .git e venv)
-rsync -avz --exclude '.git' --exclude 'venv' --exclude '__pycache__' $LOCAL_DIR $VM_USER@$VM_HOST:~/$APP_DIR
+# Remove versão antiga
+rm -rf "$HOMOLOG_DIR"
 
-# Executa remotamente os comandos necessários
-ssh $VM_USER@$VM_HOST << EOF
-cd ~/$APP_DIR
+# Copia nova versão para homologação
+cp -r "$APP_DIR" "$HOMOLOG_DIR"
+
+# Ativa ambiente virtual e inicia aplicação
+cd "$HOMOLOG_DIR"
 source venv/bin/activate
-fuser -k ${PORTA}/tcp || true
-nohup python app.py --port=${PORTA} > flask.log 2>&1 &
-EOF
 
-echo "Deploy para homologação concluído!"
+# Mata qualquer processo anterior rodando na porta 5050
+fuser -k 5050/tcp || true
+
+# Sobe a aplicação
+nohup python app.py --port=5050 > log_homologacao.txt 2>&1 &
+
+echo "Deploy concluído com sucesso no ambiente de homologação!"
