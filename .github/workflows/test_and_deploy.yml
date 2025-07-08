@@ -1,0 +1,40 @@
+name: Testar e Deploy para Homologação
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar código
+        uses: actions/checkout@v3
+
+      - name: Instalar dependências
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Executar testes
+        run: |
+          source venv/bin/activate
+          coverage run -m unittest discover tests
+          coverage report
+
+  deploy_homologacao:
+    needs: test
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Acessar VM e rodar script de deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_KEY }}
+          script: |
+            cd ~/tarefa-app
+            ./deploy_homologacao.sh
