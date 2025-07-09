@@ -1,4 +1,4 @@
-name: Testar e Deploy para Homologação
+name: Testes e Deploy
 
 on:
   push:
@@ -6,31 +6,34 @@ on:
       - main
 
 jobs:
-  test:
+  test-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Clonar código
+      - name:  Clonar o repositório
         uses: actions/checkout@v3
 
-      - name: Instalar dependências
+      - name:  Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name:  Instalar dependências
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
+          pip install coverage
 
-      - name: Executar testes
+      - name:  Rodar testes automatizados
         run: |
           source venv/bin/activate
           coverage run -m unittest discover tests
           coverage report
 
-  deploy_homologacao:
-    needs: test
-    runs-on: ubuntu-latest
-    if: success()
-    steps:
-      - name: Acessar VM e rodar script de deploy
-        uses: appleboy/ssh-action@v1.0.0
+      - name:  Deploy para Homologação
+        if: success()
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
@@ -38,3 +41,19 @@ jobs:
           script: |
             cd ~/tarefa-app
             ./deploy_homologacao.sh
+
+  deploy-producao:
+    needs: test-and-deploy
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
+
+    steps:
+      - name:  Deploy para Produção
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_KEY }}
+          script: |
+            cd ~/tarefa-app
+            ./deploy_producao.sh
