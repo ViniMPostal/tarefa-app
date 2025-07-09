@@ -37,6 +37,9 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
+      - name: Aguardar PostgreSQL iniciar
+        run: sleep 10
+
       - name: Definir variável de ambiente do banco
         run: echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/tarefa_test" >> $GITHUB_ENV
 
