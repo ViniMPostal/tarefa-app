@@ -2,58 +2,78 @@ name: Testes e Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   test-and-deploy:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tarefa_test
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
-      - name:  Clonar o repositório
+      - name: Clonar o repositório
         uses: actions/checkout@v3
 
-      - name:  Configurar Python
+      - name: Configurar Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - name:  Instalar dependências
+      - name: Instalar dependências
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
-          pip install coverage
 
-      - name:  Rodar testes automatizados
+      - name: Definir variável de ambiente do banco
+        run: echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/tarefa_test" >> $GITHUB_ENV
+
+      - name: Rodar testes automatizados
         run: |
           source venv/bin/activate
-          coverage run -m unittest discover tests
-          coverage report
+          python -m unittest discover -s tests
 
-      - name:  Deploy para Homologação
-        if: success()
-        uses: appleboy/ssh-action@v1.0.3
+  deploy-homologacao:
+    needs: test-and-deploy
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Deploy para Homologação
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_KEY }}
           script: |
             cd ~/tarefa-app
+            git pull origin main
+            source venv/bin/activate
             ./deploy_homologacao.sh
 
   deploy-producao:
-    needs: test-and-deploy
+    needs: deploy-homologacao
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' }}
-
+    if: success()
     steps:
-      - name:  Deploy para Produção
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy para Produção
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_KEY }}
           script: |
             cd ~/tarefa-app
+            source venv/bin/activate
             ./deploy_producao.sh
